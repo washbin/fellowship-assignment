@@ -1,10 +1,5 @@
-/*
-    This exercise has been updated to use Solidity version 0.5
-    Breaking changes from 0.4 to 0.5 can be found here: 
-    https://solidity.readthedocs.io/en/v0.5.0/050-breaking-changes.html
-*/
 // SPDX-License-Identifier:MIT
-pragma solidity ^0.5.0;
+pragma solidity ^0.8.4;
 
 contract SupplyChain {
     /* set owner */
@@ -122,7 +117,7 @@ contract SupplyChain {
         _;
     }
 
-    constructor() public {
+    constructor() {
         /* Here, set the owner as the person who instantiated the contract
        and set your skuCount to 0. */
         owner = msg.sender;
@@ -139,8 +134,8 @@ contract SupplyChain {
             sku: skuCount,
             price: _price,
             state: State.ForSale,
-            seller: msg.sender,
-            buyer: address(0)
+            seller: payable(msg.sender),
+            buyer: payable(address(0))
         });
         skuCount = skuCount + 1;
         return true;
@@ -160,9 +155,10 @@ contract SupplyChain {
         paidEnough(items[sku].price)
         checkValue(sku)
     {
-        items[sku].buyer = msg.sender;
-        items[sku].state = State.Sold;
-        items[sku].seller.transfer(items[sku].price);
+        Item storage desiredItem = items[sku];
+        desiredItem.seller.transfer(desiredItem.price);
+        desiredItem.buyer = payable(msg.sender);
+        desiredItem.state = State.Sold;
         emit LogSold(sku);
     }
 
